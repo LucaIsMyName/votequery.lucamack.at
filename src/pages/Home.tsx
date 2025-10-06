@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
       <div className="max-w-3xl w-full bg-white rounded-lg shadow-lg p-8">
         <h1 className="text-4xl font-bold text-center text-blue-600 mb-6">VoteQuery</h1>
         <p className="text-xl text-center text-gray-700 mb-8">

@@ -41,7 +41,7 @@ const Results = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-white p-4">
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-blue-600 my-6">Voting Results</h1>
         
@@ -55,7 +55,7 @@ const Results = () => {
               
               return (
                 <div key={systemType} className={`border border-${color}-200 rounded-lg overflow-hidden`}>
-                  <div className={`bg-${color}-100 p-4`}>
+                  <div className={`bg-${color}-50 border-b border-${color}-100 p-4`}>
                     <h3 className={`text-xl font-semibold text-${color}-800`}>{getSystemName(type)}</h3>
                   </div>
                   
@@ -96,7 +96,7 @@ const Results = () => {
           <div className="mt-10">
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Key Observations</h3>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-yellow-50 border border-yellow-100 rounded-lg p-4 shadow-sm">
               <p className="text-gray-700">
                 {(() => {
                   // Get winners from each system

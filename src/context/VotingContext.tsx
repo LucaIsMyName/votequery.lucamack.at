@@ -16,7 +16,7 @@ import {
 
 interface VotingContextType {
   session: VotingSession | null;
-  createSession: (parties: Party[], systems: VotingSystem[]) => void;
+  createSession: (parties: Party[], systems: VotingSystem[], totalSeats?: number) => void;
   addParty: (name: string) => void;
   removeParty: (id: string) => void;
   toggleVotingSystem: (type: VotingSystemType) => void;
@@ -59,7 +59,7 @@ const defaultVotingSystems: VotingSystem[] = [
 export const VotingProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<VotingSession | null>(null);
 
-  const createSession = (parties: Party[], systems: VotingSystem[] = defaultVotingSystems) => {
+  const createSession = (parties: Party[], systems: VotingSystem[] = defaultVotingSystems, totalSeats: number = 100) => {
     const newSession: VotingSession = {
       id: uuidv4(),
       parties,
@@ -68,7 +68,8 @@ export const VotingProvider = ({ children }: { children: ReactNode }) => {
         single: [],
         ranked: [],
         proportional: []
-      }
+      },
+      totalSeats
     };
     setSession(newSession);
   };
@@ -135,7 +136,7 @@ export const VotingProvider = ({ children }: { children: ReactNode }) => {
     const results = {
       single: calculateSingleVoteResults(session.parties, session.votes.single),
       ranked: calculateRankedChoiceResults(session.parties, session.votes.ranked),
-      proportional: calculateProportionalResults(session.parties, session.votes.proportional)
+      proportional: calculateProportionalResults(session.parties, session.votes.proportional, session.totalSeats)
     };
     
     setSession({

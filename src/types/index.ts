@@ -24,6 +24,7 @@ export interface VotingSession {
   votingSystems: VotingSystem[];
   votes: Record<VotingSystemType, Vote[]>;
   results?: Record<VotingSystemType, VotingResult>;
+  totalSeats: number;
 }
 
 export interface VotingResult {

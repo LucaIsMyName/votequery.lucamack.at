@@ -6,11 +6,12 @@ import type { Party, VotingSystemType } from '../types';
 
 const Create = () => {
   const navigate = useNavigate();
-  const { createSession, toggleVotingSystem } = useVoting();
+  const { createSession } = useVoting();
   
   const [parties, setParties] = useState<Party[]>([]);
   const [partyName, setPartyName] = useState('');
   const [selectedSystems, setSelectedSystems] = useState<VotingSystemType[]>(['single', 'ranked', 'proportional']);
+  const [totalSeats, setTotalSeats] = useState<number>(100);
   
   const handleAddParty = () => {
     if (partyName.trim() === '') return;
@@ -47,18 +48,21 @@ const Create = () => {
       return;
     }
     
-    createSession(parties, []);
-    selectedSystems.forEach(system => {
-      if (system !== 'single') { // Single is already included by default
-        toggleVotingSystem(system);
-      }
-    });
+    // Get the default voting systems that match the selected types
+    const defaultSystems = [
+      { id: 'single', type: 'single' as VotingSystemType, name: 'Single Vote', description: 'Each voter gets one vote for their preferred party.' },
+      { id: 'ranked', type: 'ranked' as VotingSystemType, name: 'Ranked Choice', description: 'Voters rank parties in order of preference.' },
+      { id: 'proportional', type: 'proportional' as VotingSystemType, name: 'Proportional Representation', description: 'Seats are allocated in proportion to the votes each party receives.' }
+    ].filter(system => selectedSystems.includes(system.type));
+    
+    // Create session with the selected voting systems
+    createSession(parties, defaultSystems, totalSeats);
     
     navigate('/query');
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-white p-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-blue-600 my-6">Create Voting Scenario</h1>
         
@@ -107,6 +111,25 @@ const Create = () => {
         </div>
         
         <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Parliament Settings</h2>
+          
+          <div className="mb-6">
+            <label htmlFor="total-seats" className="block text-gray-700 font-medium mb-2">Total Number of Seats</label>
+            <div className="flex items-center">
+              <input
+                type="number"
+                id="total-seats"
+                min="1"
+                max="1000"
+                value={totalSeats}
+                onChange={(e) => setTotalSeats(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span className="ml-2 text-gray-600">seats</span>
+            </div>
+            <p className="text-sm text-gray-500 mt-1">This will be used for proportional representation calculations.</p>
+          </div>
+          
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Select Voting Systems</h2>
           
           <div className="space-y-3">

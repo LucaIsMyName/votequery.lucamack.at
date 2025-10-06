@@ -89,7 +89,7 @@ const Query = () => {
   const currentSystemObj = session.votingSystems.find(system => system.type === currentSystem);
   
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-white p-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center text-blue-600 my-6">Cast Your Vote</h1>
         
@@ -114,70 +114,99 @@ const Query = () => {
             )}
           </div>
           
-          <div className="space-y-4">
-            {session.parties.map(party => (
-              <div key={party.id} className="border border-gray-200 rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium text-lg">{party.name}</span>
-                  
-                  {currentSystem === 'single' && (
-                    <button
-                      onClick={() => handleSingleVote(party.id)}
-                      className={`px-4 py-2 rounded-lg transition duration-200 ${
-                        currentVotes.some(vote => vote.partyId === party.id)
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 hover:bg-gray-300 text-gray-800'
-                      }`}
-                    >
-                      Vote
-                    </button>
-                  )}
-                  
-                  {currentSystem === 'ranked' && (
-                    <select
-                      value={currentVotes.find(vote => vote.partyId === party.id)?.rank || ''}
-                      onChange={(e) => handleRankedVote(party.id, Number(e.target.value))}
-                      className="border border-gray-300 rounded-lg px-3 py-2"
-                    >
-                      <option value="">Select rank</option>
-                      {session.parties.map((_, index) => (
-                        <option key={index} value={index + 1}>
-                          {index + 1}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                  
-                  {currentSystem === 'proportional' && (
+          {currentSystem === 'single' && (
+            <div className="space-y-4">
+              <p className="text-gray-700 mb-4">Select one party that you want to vote for:</p>
+              {session.parties.map(party => (
+                <div key={party.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                  <label className="flex items-center cursor-pointer w-full">
+                    <input
+                      type="radio"
+                      name="single-vote"
+                      checked={currentVotes.some(vote => vote.partyId === party.id)}
+                      onChange={() => handleSingleVote(party.id)}
+                      className="h-5 w-5 text-blue-600"
+                    />
+                    <span className="ml-3 font-medium text-lg text-gray-800">{party.name}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {currentSystem === 'ranked' && (
+            <div className="space-y-4">
+              <p className="text-gray-700 mb-4">Rank parties in order of preference:</p>
+              <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                <p className="text-sm text-blue-700">Assign a rank to each party (1 being your most preferred).</p>
+              </div>
+              {session.parties.map((party) => (
+                <div key={party.id} className="border border-gray-200 bg-white rounded-lg p-4 flex items-center justify-between">
+                  <span className="font-medium text-lg text-gray-800">{party.name}</span>
+                  <select
+                    value={currentVotes.find(vote => vote.partyId === party.id)?.rank || ''}
+                    onChange={(e) => handleRankedVote(party.id, Number(e.target.value))}
+                    className="border border-gray-300 rounded-lg px-3 py-2 bg-white"
+                  >
+                    <option value="">Select rank</option>
+                    {session.parties.map((_, index) => (
+                      <option key={index} value={index + 1}>
+                        {index + 1}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ))}
+            </div>
+          )}
+          
+          {currentSystem === 'proportional' && (
+            <div className="space-y-4">
+              <p className="text-gray-700 mb-4">Distribute 100 points among the parties according to your preferences:</p>
+              <div className="bg-blue-50 p-3 rounded-lg mb-4">
+                <p className="text-sm text-blue-700">Remaining points: {100 - currentVotes.reduce((sum, vote) => sum + (vote.weight || 0), 0)}</p>
+              </div>
+              {session.parties.map(party => (
+                <div key={party.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium text-lg text-gray-800">{party.name}</span>
                     <div className="flex items-center">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={currentVotes.find(vote => vote.partyId === party.id)?.weight || 0}
+                        onChange={(e) => handleProportionalVote(party.id, Number(e.target.value))}
+                        className="mr-3 w-48"
+                      />
                       <input
                         type="number"
                         min="0"
                         max="100"
                         value={currentVotes.find(vote => vote.partyId === party.id)?.weight || 0}
                         onChange={(e) => handleProportionalVote(party.id, Number(e.target.value))}
-                        className="border border-gray-300 rounded-lg px-3 py-2 w-20"
+                        className="border border-gray-300 rounded-lg px-3 py-2 w-20 text-right"
                       />
-                      <span className="ml-2">points</span>
+                      <span className="ml-2 text-gray-600">points</span>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           
           <div className="mt-8 flex justify-center">
             <button
               onClick={handleSubmitVotes}
               disabled={
                 (currentSystem === 'single' && currentVotes.length === 0) ||
-                (currentSystem === 'ranked' && currentVotes.length < session.parties.length) ||
+                (currentSystem === 'ranked' && currentVotes.filter(vote => vote.rank !== undefined).length < session.parties.length) ||
                 (currentSystem === 'proportional' && 
                   currentVotes.reduce((sum, vote) => sum + (vote.weight || 0), 0) !== 100)
               }
               className={`py-3 px-8 rounded-lg text-lg transition duration-300 ${
                 (currentSystem === 'single' && currentVotes.length === 0) ||
-                (currentSystem === 'ranked' && currentVotes.length < session.parties.length) ||
+                (currentSystem === 'ranked' && currentVotes.filter(vote => vote.rank !== undefined).length < session.parties.length) ||
                 (currentSystem === 'proportional' && 
                   currentVotes.reduce((sum, vote) => sum + (vote.weight || 0), 0) !== 100)
                   ? 'bg-gray-400 cursor-not-allowed text-white'
@@ -189,18 +218,18 @@ const Query = () => {
           </div>
         </div>
         
-        <div className="bg-gray-100 rounded-lg p-4">
-          <h3 className="font-medium mb-2">Voting Progress:</h3>
+        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <h3 className="font-medium mb-2 text-gray-700">Voting Progress:</h3>
           <div className="flex flex-wrap gap-2">
             {session.votingSystems.map(system => (
               <div
                 key={system.id}
                 className={`px-3 py-1 rounded-full text-sm ${
                   completedSystems.includes(system.type)
-                    ? 'bg-green-200 text-green-800'
+                    ? 'bg-green-100 text-green-800 border border-green-200'
                     : system.type === currentSystem
-                    ? 'bg-blue-200 text-blue-800'
-                    : 'bg-gray-200 text-gray-600'
+                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200'
                 }`}
               >
                 {system.name}
